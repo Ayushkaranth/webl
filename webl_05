@@ -1,0 +1,31 @@
+#define BLYNK_PRINT Serial
+#define BLYNK_AUTH_TOKEN "L-FsMX7xKg2tJLAy6-euOcl-LN7h4qnn"
+#define BLYNK_TEMPLATE_ID "TMPL3eAKMQiHT"
+#define BLYNK_TEMPLATE_NAME "Quickstart Template"
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+// Wi-Fi credentials
+char auth[] = "L-FsMX7xKg2tJLAy6-euOcl-LN7h4qnn";
+char ssid[] = "Suhas's Galaxy M32";
+char pass[] = "12345678";
+
+// Use built-in LED (GPIO2 / D4 on NodeMCU)
+#define LED_PIN LED_BUILTIN
+
+BLYNK_WRITE(V1) {
+  int state = param.asInt();
+  digitalWrite(LED_PIN, state ? LOW : HIGH); // Active LOW for built-in LED
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH); // Start with LED OFF
+  Blynk.begin(auth, ssid, pass);
+}
+
+void loop() {
+  Blynk.run();
+}
