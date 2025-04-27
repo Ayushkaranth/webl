@@ -1,123 +1,32 @@
-// Subscriber
+//install pip:
+pip install paho-mqtt
 
-#include <WiFi.h>            // For ESP32 use WiFi.h, for ESP8266 use ESP8266WiFi.h
-#include <PubSubClient.h>
+//1.PC as Subscriber and App as Publisher
+import paho.mqtt.client as mqtt
 
-const char* ssid = "Your_WiFi_Name";  // 🔹 Replace with your WiFi SSID
-const char* password = "Your_WiFi_Password";  // 🔹 Replace with your WiFi Password
-const char* mqtt_server = "mqtt.eclipseprojects.io";  // 🔹 MQTT broker
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code", rc)
+    client.subscribe('saniya/data')
 
-WiFiClient espClient;
-PubSubClient client(espClient);
+def on_message(client, userdata, msg):
+    print("Received message:", msg.payload.decode())
 
-// Callback function - Executes when a message is received
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("\n📢 Message received on topic: ");
-  Serial.println(topic);
- 
-  Serial.print("📝 Message: ");
-  String receivedMessage = "";
- 
-  for (int i = 0; i < length; i++) {
-    receivedMessage += (char)payload[i];  // Convert payload to string
-  }
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect("mqtt.eclipseprojects.io", 1883)
 
-  Serial.println(receivedMessage);
+client.loop_forever()
 
-  // Display Roll Number along with the received message
-  Serial.println("📌 Roll Number: 04/10-D10B");
-}
+//2.PC as Publisher and App as Subscriber
+import paho.mqtt.client as mqtt
 
-void setup() {
-  Serial.begin(115200);
- 
-  // Connect to WiFi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\n✅ WiFi Connected!");
+client = mqtt.Client()
+client.connect("mqtt.eclipseprojects.io", 1883)
 
-  // Connect to MQTT broker
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+topic = "saniya/data"
+message = "Hello Saniya!"
 
-  while (!client.connected()) {
-    Serial.print("🔄 Connecting to MQTT...");
-    if (client.connect("ESP32_Subscriber")) {
-      Serial.println("✅ Connected!");
-      client.subscribe("pi/data");  // Subscribe to the topic
-    } else {
-      Serial.print("❌ Failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" Retrying...");
-      delay(2000);
-    }
-  }
-}
-
-void loop() {
-  if (!client.connected()) {
-    setup();  // Reconnect if disconnected
-  }
-  client.loop();
-}
-
-
-
-// publisher
-
-
-
-#include <WiFi.h>            // For ESP32 use WiFi.h, for ESP8266 use ESP8266WiFi.h
-#include <PubSubClient.h>    
-
-const char* ssid = "";  // 🔹 Replace with your WiFi SSID
-const char* password = "";  // 🔹 Replace with your WiFi Password
-const char* mqtt_server = "mqtt.eclipseprojects.io";  // 🔹 MQTT broker
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-void setup() {
-  Serial.begin(115200);
- 
-  // Connect to WiFi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi Connected!");
-
-  // Connect to MQTT broker
-  client.setServer(mqtt_server, 1883);
-
-  while (!client.connected()) {
-    Serial.print("Connecting to MQTT...");
-    if (client.connect("ESP32_Client")) {
-      Serial.println("Connected!");
-    } else {
-      Serial.print("Failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" Retrying...");
-      delay(2000);
-    }
-  }
-}
-
-void loop() {
-  if (!client.connected()) {
-    setup();  // Reconnect if disconnected
-  }
-  client.loop();
-
-  // Publish a message every 2 seconds with Roll Number
-  String message = "Hello from ESP32! Roll No: 04/10-D10B";
-  client.publish("pi/data", message.c_str());
- 
-  Serial.println("Message Published: " + message);
-  delay(2000);
-}
-
+client.publish(topic, message)
+print(f"Published '{message}' to topic '{topic}'")
+client.disconnect()
