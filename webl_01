@@ -4,11 +4,11 @@ DHT dht(DHTPIN, DHT11);
 void setup()
 {
 Serial.begin(9600); // Setting Baud rate to 9600
-} void
-loop()
-{ float h = dht.readHumidity(); // read
-humidity float t = dht.readTemperature(); //
-read temp
+} 
+void loop()
+{ 
+float h = dht.readHumidity(); // read humidity 
+float t = dht.readTemperature(); //read temp
 Serial.println("Prakhar 63");
 Serial.print(" Current humidity = ");
 Serial.print(h);
